@@ -5,8 +5,33 @@ from app.utils.exceptions import BaseAPIException
 import logging
 import time
 import json
+import os
 
-logger = logging.getLogger(__name__)
+class JSONFormatter(logging.Formatter):
+    def format(self, record):
+        payload = {
+            "time": self.formatTime(record),
+            "level": record.levelname,
+            "logger": record.name,
+            "message": record.getMessage(),
+        }
+        if hasattr(record, "data"):
+            data = record.__dict__.get("data")
+            if isinstance(data, dict):
+                payload.update(data)
+            else:
+                payload["data"] = data
+        return json.dumps(payload, ensure_ascii=False)
+
+LOG_DIR = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), "logs")
+os.makedirs(LOG_DIR, exist_ok=True)
+
+request_logger = logging.getLogger("request")
+if not any(isinstance(h, logging.FileHandler) and getattr(h, "baseFilename", "").endswith("request.log") for h in request_logger.handlers):
+    fh = logging.FileHandler(os.path.join(LOG_DIR, "request.log"))
+    fh.setFormatter(JSONFormatter())
+    request_logger.setLevel(logging.INFO)
+    request_logger.addHandler(fh)
 
 class LoggingMiddleware(BaseHTTPMiddleware):
     async def dispatch(self, request: Request, call_next: RequestResponseEndpoint):
@@ -49,9 +74,7 @@ class LoggingMiddleware(BaseHTTPMiddleware):
             except:
                 log_data["request_body"] = "Unable to parse"
         
-        if response.status_code >= 400:
-            logger.error(f"Request failed: {log_data}")
-        else:
-            logger.info(f"Request completed: {log_data}")
+        level = logging.ERROR if response.status_code >= 400 else logging.INFO
+        request_logger.log(level, "request", extra={"data": log_data})
         
         return response

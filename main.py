@@ -11,6 +11,7 @@ import uvicorn
 Base.metadata.create_all(bind=engine)
 
 app = FastAPI(
+    debug=settings.DEBUG,
     title=settings.PROJECT_NAME,
     version=settings.VERSION,
     description=settings.DESCRIPTION,
