@@ -4,7 +4,7 @@ from app.config.database import get_db
 from app.schemas.user import LoginRequest, TokenResponse
 from app.schemas.common import BaseResponse
 from app.services.user_service import UserService
-from app.utils.auth import create_access_token
+from app.utils.auth import create_access_token, delete_token
 from app.config.logs import get_json_logger
 
 
@@ -28,3 +28,14 @@ def login(login: LoginRequest, db: Session = Depends(get_db)):
     # 登录成功日志
     app_logger.info("login success", extra={"data": {"username": login.username, "token": token}})
     return BaseResponse(success=True, message="Login successful", data=TokenResponse(token=token))
+
+
+@router.get("/logout", response_model=BaseResponse)
+def logout(token: str = ""):
+    """
+    Logout user and invalidate JWT token.
+    """
+    # 删除 token
+    delete_token(token)
+    return BaseResponse(success=True, message="Logout successful")
+    

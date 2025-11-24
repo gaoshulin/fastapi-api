@@ -12,3 +12,10 @@ def create_access_token(data: Dict[str, Any], expires_minutes: Optional[int] = N
 
 def decode_token(token: str) -> Dict[str, Any]:
     return jwt.decode(token, settings.SECRET_KEY, algorithms=[settings.ALGORITHM])
+
+def delete_token(token: str) -> None:
+    """
+    Delete token from database.
+    """
+    # 从数据库删除 token
+    pass    
