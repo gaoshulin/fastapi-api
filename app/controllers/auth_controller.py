@@ -6,11 +6,31 @@ from app.schemas.common import BaseResponse
 from app.services.user_service import UserService
 from app.utils.auth import create_access_token, delete_token
 from app.config.logs import get_json_logger
+from app.schemas.user import UserResponse, UserCreate
+from app.utils.exceptions import ConflictException
 
 
 app_logger = get_json_logger("app.log")
 
 router = APIRouter(prefix="/auth", tags=["auth"])
+
+
+@router.post("/register", response_model=BaseResponse)
+def create_user(user: UserCreate, db: Session = Depends(get_db)):
+    """
+    创建新用户
+    """
+    try:
+        user_service = UserService(db)
+        created_user = user_service.create_user(user)
+        return BaseResponse(
+            success=True,
+            message="User register successfully",
+            data=UserResponse.from_orm(created_user)
+        )
+    except ConflictException as e:
+        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=str(e))
+
 
 @router.post("/login", response_model=BaseResponse)
 def login(login: LoginRequest, db: Session = Depends(get_db)):

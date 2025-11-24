@@ -9,7 +9,8 @@ from app.models import User
 # 允许的路径，无需认证
 EXEMPT_PATHS = {
     "/docs", "/redoc", "/openapi.json", "/health",
-    "/api/v1/auth/login"
+    "/api/v1/auth/login",
+    "/api/v1/auth/register"
 }
 
 class AuthMiddleware(BaseHTTPMiddleware):
@@ -17,7 +18,7 @@ class AuthMiddleware(BaseHTTPMiddleware):
         path = request.url.path
         method = request.method.upper()
         # 允许注册开放
-        if path in EXEMPT_PATHS or (path == "/api/v1/users/" and method == "POST"):
+        if path in EXEMPT_PATHS:
             return await call_next(request)
 
         auth_header = request.headers.get("authorization")

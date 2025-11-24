@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends, HTTPException, status, Header
 from sqlalchemy.orm import Session
 from typing import List
 from app.config.database import get_db
-from app.schemas.user import UserResponse, UserCreate, UserUpdate
+from app.schemas.user import UserResponse, UserUpdate
 from app.schemas.common import BaseResponse, PaginationResponse
 from app.services.user_service import UserService
 from app.utils.exceptions import NotFoundException, ConflictException
@@ -13,23 +13,6 @@ router = APIRouter(prefix="/users", tags=["users"])
 """
 用户控制器
 """
-@router.post("/", response_model=BaseResponse)
-def create_user(user: UserCreate, db: Session = Depends(get_db)):
-    """
-    创建新用户
-    """
-    try:
-        user_service = UserService(db)
-        created_user = user_service.create_user(user)
-        return BaseResponse(
-            success=True,
-            message="User created successfully",
-            data=UserResponse.from_orm(created_user)
-        )
-    except ConflictException as e:
-        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=str(e))
-
-
 @router.get("/", response_model=BaseResponse)
 def get_users(skip: int = 0, limit: int = 100, token: str = Header(None), db: Session = Depends(get_db)):
     """
