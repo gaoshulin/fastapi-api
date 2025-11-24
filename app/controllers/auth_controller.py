@@ -50,7 +50,7 @@ def login(login: LoginRequest, db: Session = Depends(get_db)):
     token = create_access_token({"sub": str(user.id)})
 
     # 缓存 token 到 Redis
-    redis_cache.set(f"user_token:{token}", token, expire_seconds=600)
+    redis_cache.set(f"user_token:{user.id}", token, expire_seconds=600)
 
     # 登录成功日志
     app_logger.info("login success", extra={"data": {"username": login.username, "token": token}})
