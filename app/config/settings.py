@@ -13,6 +13,12 @@ class Settings(BaseSettings):
     
     API_PREFIX: str = "/api/v1"
     
+    # Redis 配置
+    REDIS_HOST: str = "localhost"
+    REDIS_PORT: int = 6379
+    REDIS_DB: int = 0
+    REDIS_PASS: str = ""
+    
     # DATABASE_URL: str = "sqlite:///./app.db"
     DATABASE_URL: str = "mysql+pymysql://root:ServBay.dev@localhost:3306/galen_test?charset=utf8mb4"
 
